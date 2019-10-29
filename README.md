@@ -1,7 +1,10 @@
 # Meson Android HelloWord
 
 A proof of concept to demonstrate the current challenges in getting
-meson to work with the Android NDK
+meson to work with the Android NDK.
+
+[Associated meson build issue](https://github.com/mesonbuild/meson/issues/6114)
+
 
 ## Usage
 
@@ -16,6 +19,8 @@ to just change `ANDROID_SDK_HOME` and go.
 - find_library is overridden by explictly telling it where the lib paths are
 - Driven with a shell script :)
 - Must determine and remove variables that are not contributing to the build
+- cmake subprojects don't work. -rpath $ORIGIN path is somehow not being substituted while everything
+  else is configured correctly
 
 ## Output
     ppetraki@vanguard:~/Sandbox/Games/meson-android-helloworld$ ./cross/build-armv7a.sh 
