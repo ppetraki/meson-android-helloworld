@@ -13,14 +13,22 @@ TOOLCHAIN="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
 
 HOST_ROOT="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
 SYS_ROOT="${HOST_ROOT}/sysroot"
-
-# XXX I not sure how much of this cmake config is actually having an impact
+LIB_PATH="/${SYS_ROOT}/usr/lib/${ARCH}-linux-androideabi:${SYS_ROOT}/usr/lib/${ARCH}-linux-androideabi/${API_LEVEL}:${ANDROID_NDK_HOME}/platforms/android-${API_LEVEL}/arch-${ARCH}/usr/lib"
+INC_PATH="${SYS_ROOT}/usr/include"
 
 export PATH="${HOST_ROOT}/bin:${PATH}"
+
+# XXX I not sure how much of this cmake config is actually having an impact
 export CMAKE_PREFIX_PATH="${SYS_ROOT}"
 export CMAKE_ROOT="${ANDROID_SDK_HOME}/Android/Sdk/cmake/3.10.2.4988404"
-export CMAKE_LIBRARY_PATH="/${SYS_ROOT}/usr/lib/${ARCH}-linux-androideabi:${SYS_ROOT}/usr/lib/${ARCH}-linux-androideabi/${API_LEVEL}:${ANDROID_NDK_HOME}/platforms/android-${API_LEVEL}/arch-${ARCH}/usr/lib"
-export CMAKE_INCLUDE_PATH="${SYS_ROOT}/usr/include"
+export CMAKE_LIBRARY_PATH=${LIB_PATH}
+export CMAKE_INCLUDE_PATH=${INC_PATH}
+
+export CFLAGS="-DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
+  -DANDROID_STL=c++_shared \
+  -DANDROID_TOOLCHAIN=clang \
+  -DANDROID_PLATFORM=android-${API_LEVEL} \
+  -DANDROID_ABI=${ABI}"
 
 echo "building..."
 
@@ -30,13 +38,8 @@ rm -rf ${BUILD_DIR}
 
 meson setup --errorlogs  \
   --prefix=${ANDROID_NDK_HOME} \
-  --includedir=${CMAKE_INCLUDE_DIR} \
-  --libdir=${CMAKE_LIBRARY_PATH} \
-  -DCMAKE_TOOLCHAIN_FILE=${TOOLCHAIN} \
-  -DANDROID_STL=c++_shared \
-  -DANDROID_TOOLCHAIN=clang \
-  -DANDROID_PLATFORM="android-${API_LEVEL}" \
-  -DANDROID_ABI=${ABI} \
+  --includedir=${INC_PATH} \
+  --libdir=${LIB_PATH} \
   --build.cmake-prefix-path=${SYS_ROOT} \
   --cross-file cross/android-armhf.ini  \
   ${BUILD_DIR} .
